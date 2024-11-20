@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -119,6 +119,122 @@
         <p>&copy; 2024 TikTok Video Downloader</p>
     </footer>
     
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Video Downloader</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 80px;
+        }
+        .form-box {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .progress {
+            margin-top: 20px;
+            display: none;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+    <script>
+        function startDownload() {
+            const accountUrl = document.getElementById('account_url').value;
+            if (!accountUrl) {
+                alert("Please enter a TikTok account URL!");
+                return;
+            }
+
+            // Send a POST request to start the download
+            fetch('/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ account_url: accountUrl })
+            }).then(response => {
+                if (response.status === 202) {
+                    document.querySelector('.progress').style.display = 'block'; // Show progress bar
+                    updateProgress(); // Start tracking progress
+                } else {
+                    alert("Error starting the download process. Please try again.");
+                }
+            }).catch(error => {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            });
+        }
+
+        function updateProgress() {
+            fetch('/progress_status')
+                .then(response => response.json())
+                .then(data => {
+                    const progressBar = document.getElementById('progress-bar');
+                    progressBar.style.width = data.progress + '%';
+                    progressBar.innerText = data.progress + '%';
+
+                    if (data.progress < 100) {
+                        setTimeout(updateProgress, 1000); // Check progress every second
+                    } else {
+                        // When progress reaches 100%, download the ZIP
+                        downloadZip();
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching progress:", error);
+                });
+        }
+
+        function downloadZip() {
+            const link = document.createElement('a');
+            link.href = '/download_zip'; // The endpoint to download the ZIP
+            link.download = 'tiktok_videos.zip'; // The suggested file name
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="form-box">
+                    <h1 class="text-center">TikTok Video Downloader</h1>
+                    <form onsubmit="return false;">
+                        <div class="mb-3">
+                            <label for="account_url" class="form-label">Enter TikTok Account URL:</label>
+                            <input type="url" id="account_url" class="form-control" placeholder="https://www.tiktok.com/@username" required>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="startDownload()">Download Videos</button>
+                    </form>
+                    <div class="progress mt-4">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <p>&copy; 2024 TikTok Video Downloader. All rights reserved.</p>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
